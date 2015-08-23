@@ -1,0 +1,4 @@
+smtpUser=indoreankita@gmail.com
+smtpPassword=r6c6CVpz1GyL3LUty2hsZA
+smtpHost=smtp.mandrillapp.com
+smtpPort=587

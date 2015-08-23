@@ -1,0 +1,73 @@
+It is a program that will read from email queue table and send the emails over an SMTP server
+
+STEPS TO SET THE PROJECT:
+
+1) Fork from github url:
+
+2) Change src/configuration.txt file for your smtp configuration
+
+3) Run queries given in email_queue.sql
+
+4) To change database name, mysql username, password edit DBConnection.java file
+
+5) SendMultipleMail.java file contains the main function
+
+HOW TO RUN THE CODE:
+ 
+cd /path to mailer/jar
+java -jar mailer.jar arg1 arg2 arg3
+where arg1 arg2 and arg3 are optional arguments representing:
+
+arg1: limit of the records to be fetched in a single hit
+arg2: total number of processes you are running
+arg3: current number of process
+
+For example if we want to run 3 processes(either on same or different server)
+where each process will fetch 20 records at a time
+Then we will run 3 process like:
+
+java -jar mailer.jar 20 3 1
+java -jar mailer.jar 20 3 2
+java -jar mailer.jar 20 3 3
+
+Default values for arguments are:
+arg1: 10
+arg2: 1
+arg3: 1
+
+
+EXPLANATION OF PROJECT:
+
+SendMultipleMail.java contains the main function
+
+EmailQueue.java class is used to work on email_queue table
+
+DBConnection.java used to connect jdbc with mysql
+
+Main function in SendMultipleMail.java fetch pending records from email_queue
+Depending on the total number of processes and current process, it decides which records to fetch for this process
+(Because when multiple processes are running, we will fetch different series of records in different processes)
+For example if we have 2 processes, then each process will pick alternate records
+if we are running 3 processes, then each process will pick 3rd alternate records and so on..
+In this way different processed on different servers will not pick duplicate records.
+
+Each process will run multiple threads to send mails simultaneously
+
+This Thread processing is done in RunnableThreads.java class
+
+SMTP.java makes smtp configuration and and sends mail using that smtp connection
+
+RunnableThreads.java runs each thread and makes an instance of SMTP.java class to send mail
+
+To avoid redundancy in thread processing, we are maintaining a field status in email_queue table
+
+SendMail Process will fetch only records with status = 0 (records not yet processed)
+When processing of records starts status is updated to 1
+When mail is successfully sent status is updated to 2
+In case of any exception status is updated to 3.
+
+We are keeping a field retry if we want to try sending mail again if failed
+
+
+
+
